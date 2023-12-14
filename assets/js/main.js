@@ -159,10 +159,104 @@
     
     });
 
+//store at cart
+$(document).ready(function () {
+    // Retrieve existing cart data from sessionStorage
+    let cart = JSON.parse(sessionStorage.getItem('cart')) || [];
 
-    jQuery(window).on("load",function(){
-        jQuery(".loader").fadeOut(1000);
+    // Function to update the cart display on the page
+    function updateCartDisplay() {
+        // Clear existing cart display
+        $('#cartItems').empty();
+
+        // Append each product to the cart display
+        cart.forEach(product => {
+            const newRow = `
+                <tr class="table-body-row">
+                    <td class="product-remove"><a href="#"><i class="far fa-window-close"></i></a></td>
+                    <td class="product-image"><img src="${product.image}" alt=""></td>
+                    <td class="product-name">${product.name}</td>
+                    <td class="product-price">₹${product.price}</td>
+                    <td class="product-quantity">${product.quantity}</td>
+                    <td class="product-total">₹${product.total}</td>
+                </tr>`;
+            $('#cartItems').append(newRow);
+          
+        });
+    }
+
+    // Event handler for the cart button click
+    $('.cart-btn').on('click', function () {
+        // Extract product details from the current item
+        const productName = $(this).siblings('h3').text();
+        const price = parseInt($(this).siblings('.product-price').text().match(/\d+/)[0]); // Extracting the numeric part
+        const productImage = $(this).siblings('.product-image').find('img').attr('src');
+
+        // Check if the product is already in the cart
+        const existingProductIndex = cart.findIndex(product => product.name === productName);
+
+        if (existingProductIndex !== -1) {
+            // If the product is already in the cart, update the quantity and price
+            cart[existingProductIndex].quantity += 1;
+            cart[existingProductIndex].total = cart[existingProductIndex].quantity * cart[existingProductIndex].price;
+        } else {
+            // If the product is not in the cart, add it with quantity 1
+            const newProduct = {
+                name: productName,
+                price: price,
+                quantity: 1,
+                total: price, // Initial total
+                image: productImage
+            };
+            cart.push(newProduct);
+        }
+
+        // Update sessionStorage with the modified cart data
+        sessionStorage.setItem('cart', JSON.stringify(cart));
+
+        // Optionally, you can display a confirmation message or perform other actions
+        alert('Product added to cart!');
+
+        // Update the cart display on the page
+        updateCartDisplay();
+       
     });
+
+    // Initial load
+    updateCartDisplay();
+  
+    // Calculate the subtotal dynamically
+    subtotal += product.total;
+    $('#subtotalValue').text(subtotal);
+   
+
+    // Assume you have updated values for shipping dynamically
+    var shipping = 45;
+
+    // Calculate the total
+   
+    var total = subtotal + shipping;
+
+    // Update the values in the table
+    //$('#subtotalValue').text(subtotal);
+    $('#shippingValue').text(shipping);
+    $('#totalValue').text(total);
+
+    // Function to calculate the subtotal based on product prices
+    function calculateSubtotal(products) {
+        var subtotal = 0;
+        for (var i = 0; i < products.length; i++) {
+            subtotal += products[i].price * products[i].quantity;
+        }
+        return subtotal;
+    }
+});
+
+
+    
+jQuery(window).on("load",function(){
+    jQuery(".loader").fadeOut(1000);
+});
 
 
 }(jQuery));
